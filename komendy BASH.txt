@@ -1,0 +1,407 @@
+echo "${BASH_VERSION}" 
+echo - służy do wyświetlania tekstu
+echo -n 			// -n line break
+echo -e 'Bash is \n amazing'    // -e backslash escape
+echo -en LUB -ne	// można łączyć opcje
+clear	//czyści ekran z poprzednich komend
+
+<< pomoc do wszystkich komend >>
+[--help],
+[-h] - zależy od dystrybucji linux
+[man] - manual do komend np. [man ls], nie wszsytkie komendy mają instrukcje
+
+
+pwd - working directory (print working directory)	// w linux nie ma ścieżek do dysków twardych, jest tylko jeden root directory, kolejne dyski także wpadają wewnątrz tej lokalizacji
+~ tylda w linux odnosi się zwykle do folderu użytkownika np. /home/pablo
+
+	<< cd >>
+cd - change directory
+cd [directory name]
+cd /  - przeniesie do parent folder 
+cd ..   - przenosi folder wyżej, z powrotem
+cd ../.. - dwa foldery wyżej
+cd LUB cd ~ - przenosi do home directory np.: cd ~/Desktop
+
+	<< ls >>
+ls - wyświetla zawartość lokalizacji
+ls [option...] [path]:
+	-a pokaże ukryte pliki
+	-r odwróci kolejność wyświetlania
+	-t sortuje wg daty/czasu
+	--color={always,never,auto}
+ls /  - wyświetli root folder
+ls poczta/  - wyświetli zawartość folderu(np. jestem w Desktop i na pulpicie jest folder o nazwie [poczta], nie muszę wchodzić komendą [cd poczta]
+BONUS: jeśli jest bardzo dużo plików w folderze użyj [ ls | more ]. Połączenie dwóch komend.
+
+	<< Absolute vs relative paths >>
+Absolutna ścieżka zaczyna się od "/" np. /home/pablo/Desktop. Można przenieść się do danej lokalizacji bez względu na to gdzie jestem aktualnie.
+Relatywna ścieżka to np. cd ../Documents  - zakładając że jestem w lokalizacji Desktop, cofam się folder wyżej i wchodzę do folderu Documents. Jeżeli byłbym w innej lokalizacji niż Desktop, komenda by nie zadziałała.
+
+	<< Multiple commands >>
+; - dodajemy średnik pomiędzy komendami
+[command1] ; [command2]
+echo -n 'text' ; echo 'text2'
+
+	<< sudo >>
+sudo - tymczasowo nadaje prawa superusera np.: [sudo ls root]
+
+	<< touch >>
+touch - tworzy plik lub aktualizuje timestamp np.:
+	touch letter.txt  // tworzy plik jeśli nie istniał lub odświeża timestamp
+	touch letter.txt postcard.txt	// tworzy dwa pliki
+
+	<< mkdir >>
+mkdir - [make directory], tworzy folder np.:
+	mkdir poczta // tworzy folder [poczta]
+
+	<< mv >>	
+mv - [move], przenosi pliki, lub zmienia nazwę np.:
+	mv flyer.txt poczta/	// przenosi plik txt do folderu [poczta]
+	mv flyer.txt list.txt	// zmiana nazwy z flyer na list
+
+	<< cp >>
+cp - [copy], kopiuje plik np.:
+	cp list.txt list2.txt	// kopiuje i nazywa na nowo(nie pozwoli tej samej nazwy ustawić)
+	cp list.txt poczta/list2.txt	// kopiuje bezpośrednio do folderu
+	cp -R  // kopiuje folder np.:
+		cp -R poczta/ postmail
+	
+	<< rm >>
+rm - [remove], kasuje pliki np.:
+	rm brief.txt note.txt	// kasuje dwa pliki
+	rm -r postmail/		// kasuje folder 
+Uwaga - komenda rm usuwa pliki permanentnie! pliki nie wpadają do kosza!
+
+	<< rmdir >>
+rmdir - [remove directory], usuwa pustą lokalizację, folder. Nie pozwoli usunąć nawet gdy pliki są ukryte np.:
+		mkdir skrzynka
+		touch skrzynka/.plik.txt
+		rmdir skrzynka/
+		rmdir: failed to remove 'skrzynka/': Directory not empty
+
+	<< Globbing >>
+Jest to metoda pozwalająca na działanie na wielu plikach na raz używając konkretnych znaków (Wildcard). Najlepiej zobrazować to na przykładzie:
+		<< * >>
+	mv *.txt teksty/	// przenosi wszytkie pliki .txt do folderu teksty
+	echo *	// wyświetla wszystkie pliki w danej lokalizacji
+	echo data.*	// wyświetla wszystkie pliki z 'data' w nazwie, bez względu na rozszerzenie pliku
+Czasami trzeba zablokować działanie funkcji globbingu jak w tym przypdaku:
+	mv *.txt new.txt	// nie pozwoli zmeinić nazwy pliku z gwiazdką na new.txt
+	mv '*.txt' new.txt	// trzeba umieścić w cudzysłowiu, aby wyłączyć globbing
+		<< ? >>
+	zamieniamy na jakikolwiek znak w zapytaniu np. echo IMG_????.jpg  // dokładnie cztery jakiekolwiek znaki muszą się znaleźć zamiast ? w nazwie pliku
+		<< [] >>
+	character range np. [0-9], [a-z]
+		<< ** >>
+	'globstar', dopasowuje od zera do nieskończoności wyniki, przykład:
+			echo **/*.txt	// wyszuka wszystkie pliki txt w każdym folderze ponizej aktualnej lokalizacji
+	rm ./*  - to dobry zwyczaj usuwania wszystkich plików w bieżącej lokalizacji, zabezpiecza przed przypadkowym usuniecięm plików z nazwą np. "-rh"
+
+///<<< Ćwiczenie >>>\\\
+cp */[0][1]*/*.pdf */[0][1]*/*.xl?? ~/Desktop/Jan/  -skopiowanie określonych plików do folderu na pulpicie
+cp */[0][2]*/*.pdf */[0][2]*/*.xl?? ~/Desktop/Feb/  -skopiowanie określonych plików do folderu na pulpicie
+echo */*/*  -wyświetlneie plików trzy poziomy w dół
+
+	<< wget >>
+	Do ściągania plików w terminalu np.
+wget [link] - zapisze plik w lokalizacji w której jestem
+
+	<< find >>
+	Instead of searching by name we can use the find program for a more sophisticated search.
+man find	-plik pomocy, jeśli jest obecny w systemie
+find .	- kropka to current working directory
+find . -type f	-wyswietla wszystkie pliki typu 'file'
+find . -type d  -wyswietla wszystkie lokalizacje'directory'
+find . -type f -mtime -7	-wyszuka wszystkie pliki, które były modyfikowane w ciągu ostatnich siedmiu dni [mtime - modification timestamp]
+find . -type f -size +10M	-find all files that are larger than 10MB
+find . -empty -delete	-delete all empty files in a directory
+
+	<< czytanie plików tekstowych >>
+
+		<< cat, head, tail >>
+	Zwykłe odczytanie pliku, bardziej podgląd bez możliwości modyfikacji.
+cat [nazwa pliku]
+head -n [liczba wierszy] [nazwa pliku] np. head -n 10 romeo.txt
+tail -n [liczba wierszy] [nazwa pliku] jw.
+
+		<< less >>
+	Czytanie wielkiego pliku na bieżąco. Komendy:
+f - forward, strona do przodu
+b - backward, strona do tyłu
+cyfra + p - procent książki np. 50p to połowa
+= - aktualna lokalizacja 
+/słowo - wyszukiwanie słowa do przodu
+?słowo - wyszukiwanie słowa do tyłu
+q - quit
+
+		<< wc [word count], du [disk usage] >>
+wc [nazwa pliku] - wyświetla wagę pliku, opcje:
+-l line
+-w words
+-c characters, bytes
+du -h [nazwa pliku] - pokaże wagę pliku
+
+		<< nano [text editor for bash] >>	
+	Jeden z prostszych edytorów plików teskstowych, przeważnie pre-installed
+nano [nazwa pliku] - otwiera edycję pliku
+
+	<< zapisywanie rezultatu komend do pliku >>
+	Za pomocą tych komend można zapisać wynik zapytań w terminalu/bashu do pliku txt. W terminalu nie wyświetli się wynik.
+		<< '>' & '>>' >>
+ls > wynik.txt	// zapisze do pliku txt wynik komendy ls
+echo 'dopisany tekst' >> wynik.txt	// dopisze linijkę tekstu do poprzedniego pliku
+
+	The standard streams:
+	< stdin
+	1> stout - wyświetla tylko prawidłowe operacje
+	2> stderr - wyświetla tylko błędy
+	dev/null aplikacja służąca do usuwania zapisów(bo mogę nie chcieć z jakiegoś powodu aby się wyświetlał)
+		przykłady:
+			du -h 1234.jpg plik_nie_istnieje.jpg 1> wynik.txt	// wyswietli tylko error o nie istniejącym pliku, a info o poprawnym zapisze się w pliku txt
+			du -h 1234.jpg plik_nie_istnieje.jpg 1> wynik.txt 2> error.txt	// error zapisze się w pliku txt
+			du -h 1234.jpg plik_nie_istnieje.jpg 1> wynik.txt 2> dev/null  // error nie wyświetli się	
+> - nadpisze plik
+>> - dopisuje do pliku
+	Redirections - zapisywanie obu streamów do jednego pliku.
+	[command] 2>&1	przykład:
+		[command] > out.txt 2>&1
+
+
+	<< pipes | >>
+Łączenie komend np. ls | wc -l
+
+	<< tee >>
+Zapisywanie do pliku komend np. ping google.com | tee ping.txt
+
+	<< sort >>
+	<< uniq >>
+	<< grep >>
+	grep służy do wyszikiwania w tekście okrślonej frazy np.: 
+		cat list.txt | grep -F 'To'  - wyszuka linie tekstu które zawierają wyraz 'To'
+		cat list.txt | grep -F 'To' | wc -l  - wyświetli ilość linii zawierających wyraz 'To'
+	
+	<< tr >>
+	tr to translate, zamienia znak na inny np.:
+		echo 'heelloo world' | tr 'o' 's'	// zamieni o na s
+		echo 'heelloo world' | tr 'a-z' 'A-Z'	// zamieni małe litery na duze
+		echo 'Bash is amazing' | tr -d ' ' 	// usunie spacje, inaczej białe znaki
+
+	<< rev >>
+	odwraca kolejność 
+	
+	<< cut >>
+	obcina wynik operacji np.:
+		uptime | cut -b 1-10	// uptime wyswietla czas pracy systemu, komenda cut obetnie wynik w bajtach(do 10 bajtów)
+		uptime | cut -c 1-10	// ucina wynik w ilości znaków(jeden znak może ważyć czasem dwie jednostki np. ą,ć itp.)
+		uptime | cut -d ' ' -f 1	//nie wiem nawet jak to wytłumaczyć... coś jakby wyświetla wyraz po kórymś(lub do) z kolei białym znaku, tu 1
+	
+	
+	<< sed >>
+	stream editor, allows us to easily execute commands on a file or on stdin, np. 'command1; command2; ...'
+	- to delete lines,
+	- to insert lines,
+	- to replace lines(the most common use): s/[pattern]/[replacement]/[flags]
+			echo 'hello world' | sed 's/world/bash/g'	// zamieni wyraz world na bash, s to substitute, g to flaga(wszystkie occurences)
+		
+	Wynik ćwiczenia:
+		grep -F '.zip' access.log | wc -l   -- wyświetlenie wszystkich wierszy z .zip w nazwie
+		grep -F '.zip' access.log | cut -d ' ' -f 7 | sort -u | wc -l  -- ograniczenie do unikalnych wierszy z .zip(informacja znajdowała się w siódmym wierszu)
+
+	
+	<< Environment variables >>
+What is a shell? The graphical user interface is always a shell!
+	> an outer layer os an OS
+	> it takes commands from the user and translates them into a form that the kernek can understand
+	> in general - everything that allows the outer world to access the operating system
+BUT shell usually refers to the command line of an operating system (CLI) - CMD in windows or Terminal on Linux. This allows us to work on devices that don't support a graphical user interface (GUI).
+
+		<< env >> 
+		Wyświetla listę zmiennych środowiskowych. Zmienne są pisane(powinny być) dużymi literami.
+Sprawdzanie pojedynczej zmiennej:
+	echo "${zmienna}" np. 
+		echo "${USER}"
+Można także bez używania cudzysłowia i nawiasów, ale taka metoda naraża na błędy. Najlepiej używać powyższej metody.
+
+Ważniesjze zmienne:
+	> HOME
+	> PWD - zmienia lokalizację working dierctory(po wyłączeniu terminala kasuje) na tą w której się znajduję. Można odczytać ostatnią za pomocą OLDPWD i nawet wyświetlić naraz - echo "${PWD} - ${OLDPWD}"
+	> USER 
+	> PATH - sotores a list of directories, aplikacje odpalają się z tych lokazlizacji(jest ich kilka)
+
+		<< Creating and deleting >>
+Tworzenie nowej zmiennej << export >> : export VAR=value  // Uwaga, bardzo ważne aby nie było białych znaków przy znaku = .
+Zmiana nazwy istniejącej: np. CITY='Starogard Gd'  // uwaga na białe znaki
+Kasowanie zmiennej << unset >> : unset VAR .
+
+		<< Different paths >>
+	> /bin - essential bianries, that need to be always available
+	> /sbin - essnetial binaries, that are usually executed as root, and need to be always available
+	> /usr/bin - non essential bianries, for all users. Could be shared with other computers
+	> /usr/sbin - non essential binaries, usually executed as root Could be shared with other computers
+	> /usr/local/bin - non essential bianries, for all users. Specific to host
+	> /usr/local/sbin - non essential binaries, usually executed as root. Specific to this host
+
+		<< Dodawanie ścieżki >>
+	PATH="${PATH}:/aktualna ścieżka"	// lokalizacja zostanie dodana 
+	which value - pokazuje ścieżkę gdzie znajduje się dany program
+
+Prosty program w pythonie:
+	#!/usr/bin/env python3	// #! - określenie lokalizacji aplikacji, zostanie najpierw poszukana, a potem poniższy kod
+	print("Hello World!")
+
+		<< Shell variable >>
+	Dostępne shelle systemowe znajdują się w tej lokalizacji: cat /etc/shells
+	Zmienić shell można za pomocą: chsh -s "/bin/rbash"
+	Aktualny shell: echo "${SHELL}"
+
+	<< Interactive login shell >>
+	ctrl + alt + F3
+	Nie mam pojęcia o co w tym chodzi, ale najwyraźniej linux może uruchamiać wirtualne pulpity za pomocą powyższej kombinacji. A pod F3 akurat jest terminal bez GUI.
+	<< Edit the bash startup files >>
+	Pliki znajdują się w ~/ i są ukryte czyli 'ls -a'.
+	Moją zmienną środowiskową dodaję w pliku .bashrc na końcu np.:
+
+	<< Dodanie alias >>
+	Ustawnienie tymczasowej ścieżki domowej: alias [nazwa]='ścieżka'
+	Można dodawać do pliku .bashrc, aby przy starcie terminala zaczytywać ten alias. Alias może także zmieniać komendy np. alias ls='ls --color'.
+
+	<< Configure the shell: set >>
+set -[feature] - to enable
+set +[feature] - to disable
+	Przydatny jest -x, pokazuje jakie procesy dzieją się w tle, gdy uruchamiam jakąś komendę. Do debugowania.
+	<< shopt >>
+	Inny sposób na konfigurację zachowania shella. See bash manual...
+
+	<< Customise the Shell Prompt PS1>>
+	Prompt String 1.
+	PS1='text'
+	Są też tzw. placeholdery:
+		\u - username
+		\h - hostname
+		\H - complete hostname
+		\w - current working directory
+		\W - last directory of the full path
+		\t - time in 24hour format
+		\@ - time in 12hour format
+	
+	Zmiana kolorów.
+	echo "${TERM}" - aktualna wersja terminala
+	toe -a  - pokaże listę terminali
+echo -e "\e[37;40m":
+
+	<< infocmp >>
+	All terminal escape sequences
+
+	<< Command substitution >>
+		$(...) np.:
+	echo -e "This is the output:\n $(ls)"
+
+	<< Program tput >>
+	We can use tput to generate escape sequences:
+		tput clear
+		tput cup 5 20
+		tput bold
+		tput sgr0 -reset terminal configuration
+
+
+		<< Shell expansions >>
+	Rozszerzenia które działają zanim wykona się komenda. 
+
+	<< File name expansions >>
+ls * - wyświetla foldery wraz z ich zawartością
+echo *
+echo *.txt - * stands for whole names
+echo ?.txt - ? stands for one character~
+ls ~ - tylda to home folder
+
+	<< Variable expansion >>
+echo "${HOME}" - najlepsza forma zapisu
+$ - rozpczyna komende expansion, tu akurat do variable. Może służyć do innych
+"${#HOME}" - query the length of a string
+"${HOME:start:length}" - cut out a substring
+"${HOME/pattern/replacement}" - replace substring(one time)
+"${HOME//pattern/replacement}" - replace substring(all occurences)
+
+	<< Word splitting >>
+Białe pola są traktowane domyślnie jako jeden znak:
+		touch a.txt         b.txt          c.txt	// utworzy trzy pliki o nazwie a, b, c
+Aby zawrzeć białe pola w pliku trzeba nazwę otoczyć apostrofami lub cudzysłowiem np. : touch '  a  .txt' 
+
+	<< Quotes >>
+cat $OLDPWD/*.txt - all expansions are being applied
+cat '$OLDPWD/*.txt' - all expansions are disabled, word splitting is disabled
+cat "$OLDPWD/*.txt" - ~, *, word splitting is disabled, variable and parameter expansion are working
+
+BEST PRACTICES(avoiding pitfalls)
+> Try to refer to filenames in the same directory as ./file.txt
+> And, for the quotes:
+	>Always use the quoting style that is as restrictive as possible
+	>Thus:
+	 >Prefer single quotes: 'hello world'
+	 >If this is not possible, use double quotes:
+		>echo 'hello ${USER}"
+		>echo 'hello '"${USER}"
+	 >Use no quoting only if there's no ambiguity, or you want all expansions to be applied:
+		>Example for no ambiguity:
+		 >ls -al (would be annoying: 'ls' '-al')
+		>Here we want all expansions:
+		 >echo ./*txt
+
+	<< Escape character >>
+\ - pozwala na wyświetlenie czy zawarcie znaku PO backslashu
+echo "\"" - wyświetli jeden cudzysłów
+Działa tylko w ". W ' nie działa.
+
+	<< Brace expansion >>
+echo data.{csv,txt}
+echo 'data.'{txt,csv}
+{start..end}:
+	echo {a..z}
+	echo {0..9}
+	echo {a..z}.txt
+>Brace expansion does not work within quotes
+>But of course this works:
+	echo 'one test'{.txt,.csv}
+	
+	<< Command substitution >>
+$(...) 
+echo "$(cat file.txt)" - this will create the command in a subshell environment and collect the output (subshell = new bash process)
+Sometime this can be useful:
+	echo 'The size of my home directory is: '"$(du -sh ~)"
+	echo 'There'"'"'re '"$(ls | wc -l)"' files in the current directory'
+Another way to write this is with backticks '`':
+	echo "`ls`" - ta metoda wyświetla elementy jeden pod drugim
+	echo "`cat list.txt`"
+
+	<< Process substitution >>
+diff - sprawdza różnicę pomiędzy plikami
+diff environment_contents.txt mybin_contents.txt
+<(command) - tworzy tymczasowy plik, który znika po wykonaniu komendy
+	Dlatego zamiast tworzyć pliki .txt z zawartością folderów, można zrobi to w "locie":
+		diff <(ls ./mybin) <(ls ./Environment)
+	i nawet wynik zapisać do pliku:
+		diff <(ls ./mybin) <(ls ./Environment) > wynik.txt
+>(command) - to use a temporary file as the input to a command
+	echo "test" > >(cat)
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+	
+
+	
+			

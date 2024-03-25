@@ -1,0 +1,308 @@
+<< Users >>
+System user,
+Regular user,
+Superuser.
+
+sudo - tymczasowo nadaje prawa superusera
+
+	<< tree >>
+sudo apt install tree	-wyświetla drzewko eksploratora, komenda [tree .] 
+
+<< Package management >>
+	Systemy linux łączą się z scentralizowanym repozytorium, które dostarczają listę dostępnych wersji, aktualizacji oprogramowania dla naszego systemu. Jest to bardzo wygodne, gdyż w ten sposób możemy także aktualizować nawet third-party software takie jak firefox, chrome itp. Niestety sposób instalacji różni się trochę pomiędzy różnymi dystrybucjami, ale zasada pozostaje ta sama.
+
+	-- dla Ubuntu --
+apt - komenda do update lub instalowania
+	[apt update LUB apt-get update] - zawsze wywoływujemy najpierw, aktualizuje listę, ale nie instaluje,
+	[apt upgrade] - instalacja zaktualizowanej listy, jest to tzw. small upgrade, bo nie usuwa żadnych paczek ani nie instaluje nowych, tylko uaktualnia
+	[apt full-upgrade LUB apt dist-upgrade] - large update, uaktualnia paczki, ale też usuwa już nie potrzebne lub instaluje zupełnie nowe
+	[apt install [package]] - instalacja programu, np. apt install cowsay
+	[apt remove [package]] - self explanatory
+	[apt autoremove] - przydatna funkcja, usuwa paczki nie potrzebne, pozostałości, może pomóc gdy występują jakieś błędy
+
+	-- dla CentOS/Rocky9 --
+dnf upgrade/update - można zamiennie używać, aktualizuje i instaluje  
+	[dnf install [package]] np.:
+		[dnf install epel-release] - odpowiada za niektóre repozytoria, musi być akutalny
+		[dnf install cowsay]
+	[dnf remove [package]] - odinstalowanie
+	[crb enable] - włączenie dodatkowych paczek?
+
+	<< Files on Unix >>
+(-) ordinary file
+(d) directories
+(l) symbolic links
+(c) character device
+(b) block device
+(p) named pipes
+(s) sockets
+	ls -l [folder/file] - pierwszy symbol oznacza typ pliku np. -rw-rw--
+
+	<< Symlink >>
+Taki jakby skrót w Windowsie(ale nie do końca, działa trochę inaczej) - przy ikonie skrótu widnieje strzałka oraz typ "l".
+ln - tool to make links between files, -s to create symlink
+ln -s target link
+It serves as a reference to another file or directory, special way of "shortcut" to another destination.
+<< BONUS - symlink w Windows powershell >>
+Komenda w powershell:	New-Item -ItemType SymbolicLink -Path Symlink.rtf -Target .\Document.rtf
+
+	<< Inodes >>
+Temat na później...
+
+	<< What is a DEVICE >>
+Idea jest taka, że wszystko jest "plikiem" ("Everything is a file or stream of bytes.") Może to być urządzenie, aplikacja.
+	- Character devices 'C' - unbuffered direct access to the hardware
+	- Block devices 'B' - buffered access to the hardware
+	- Pseudo devices - they don't refer to a physical device, usually. May show as block or character device
+		Najważniejsze pseudo-devices:
+			/dev/null - when reading - returns EOF(end of file), when writing - discards information
+			/dev/random - produces a stream of random data
+			/dev/urandom - produces random data that may be repeated id insufficient 'noise' is present
+			/dev/stdin, /dev/stdout, /dev/stderr - facilitates input,output, errors for normal Unix programs
+
+	<< Folder /proc >>
+Przydatny folder z informacjami systemowymi. Można wyświetlić dane za pomocą komendy 'cat', np.:
+	cat /proc/cpuinfo 
+	/proc/meminfo 
+	/proc/version 
+	/proc/uptime 
+	/proc/loadavg 
+
+	<< Filesystem hierarchy standard >>
+Important folders:
+	/: root directory of the hierarchy
+	/bin: contains essential command binaries required for users, merged into /usr/bin(usrmerge)
+	/boot: files for the bootloader, important to start linux up, load core system into memory
+	/dev: contains device files that represent hardware and software devices
+	/etc: contains system-wide configuration files and directories, usually text files that can be edited for system config
+	/home: personal directories for users and user-specific settings, documents and other files
+	/lib: library files THAT SUPPORTS the binaries located under /bin and /sbin, may be more depending on hardware like lib32, lib64 etc. Also merged with /usr/lib
+	/media: contains mount points for removable storage media(dyski przenośne usb itp.)
+	/mnt: mount points for additional filesystems(np. dodaktowe dyski systemowe
+	/opt: optional software packages location
+	/proc: jw.
+	/root: personal data for the root user
+	/run: runtime data, files will be emptied or removed during boot or system shutdown, komenda [df -h] wyświetla wszystkie 'zamontowane' foldery
+	/sbin: system binaries needed for root user
+	/srv: files for services
+	/sys: information about devices, drivers, kernel features
+	/tmp: temporary files, removed after reboot
+	/usr: contains shareable, read-only data, not unique to our system(system binaries, libraries, documentation and source-code
+	/usr/local: this folder's files should not be shared between multiple computers
+	/var: important folder, THIS IS THE FOLDER TO BACKUP, contains varibale data like logs, databases, websites, email etc., contents change while the system runs like database for example
+	/snap: do package management
+	/lost+found: contains recovery files in case of a crash
+
+	<< Usrmerge project >>
+Foldery /bin, /sbin, /lib są zlokalizowane w folderze /usr. Jest to echo przeszłości, gdy używano dysków talerzowych dla ułatwienia odzyskiwania danych. Dziś nie jest to potrzebne i dlatego wrzuca się te foldery do jednej lokalizcaji /usr. W przyszłości być może nie będzie już tych symlinków.
+
+
+	<< User management in Linux >>
+Types of users(most important ones):
+	1. Root users
+		> highest privileges
+		> user ID 0
+		> there can only be one root user on the system
+	2. Regular users
+		> limited privileges
+		> we can allow temporary root access through sudo
+	3. Service users
+		> for specific tasks - allows to safely run a webserver, database,...
+	4. Groups - all users have a primary group, can be assigned from zero to unlimited additional groups
+
+User information is stored in various files:
+	etc/passwd - contains basic user information
+	etc/shadow - stores encrypted user passwords and aging information
+	etc/group - has information about the groups, and their members
+
+Creating a new user [useradd]:
+	Syntax - useradd [options] [username]
+		> -m: create home directory
+		> -d: set custom home directory
+		> -s: specify default shell
+		> -g: specify primary group(if not used then default config is that a new group is created, same as username)
+		> -G: add user to secondary groups
+
+Setting password [passwd]:
+	Syntax: passwd [options] [username]
+		> -S: display password status
+		> -d: delete password
+		> -n: set minimum password age (days)
+		> -x: set maximum password age (days)
+		> -l: lock user account
+		> -u: unlock user account
+			Jak zmienić czas ważności hasła - Syntax: sudo passwd -n 7 -x 30 [username]
+
+Managing users [usermod]:
+	Syntax: usermod [options] [username]
+		> -c: change user description(full name) (np. usermod -c 'Jack Doe' jack)
+		> -s: change default shell
+		> -d: change home directory
+		> -l: change username
+		> -g: change primary group
+		> -G: change secondary groups
+		> -aG: add secondary group
+
+Deleting users [userdel]:
+	Syntax: userdel [options] [username]
+		> -r: removes home directory and mails
+		> -f: also remove home+mails and forces the logged in user to be deleted, and might delete group of the same name
+
+Sprawdzanie grup:
+	Syntax: groups [username]
+		Jeden użytkownik może należeć do wielu grup(primary i secondary groups).
+Most important groups in Ubuntu:
+	> root: the superuser group with administrative privileses, allowing complete control over the system
+	> sudo(lub [Wheel]): members can use sudo
+	> adm: allows members to read log files
+	> lpadmin / lp: members may manage printers and print queues(CUPS)
+	> www-data: a group for web server processes, gives access to web content
+	> plugdev: allow this user to manage pluggable devices(USB sticks, external HDDs,...)
+
+Adding groups to a user:
+	We can use the [usermod] for this:
+		> -g: change primary group
+		> -G: change secondary groups
+		> -aG: add secondary group
+	Depending on the system, there can also be this:
+		adduser [user] [group]
+		deluser [user] [group]
+
+Creating, changing and deleting a group:
+	Create a group with [groupadd]
+		Syntax: groupadd [options] groupname
+			> -g: option to set custom GID(group ID)
+		example: groupadd -g 1005 newgroup
+		Info is then stored in /etc/group file. It is important to name groups with numbers above one thousand.
+	Change a group with [groupmod]
+		Syntax: groupmod [options] groupname
+			> -n: change the name of the group
+			> -g: change the group Id (GID)
+	Delete a group with [groupdel]
+		Syntax: groupdel groupname
+			> this will fail if the group is the primary group of a user
+
+The switch user command [su]:
+	Syntax: su [username]
+		> Logowanie się w terminalu do innego użytkownika, [exit] aby wyjść
+		> Jeśli nie wpiszemy nazwy użytkownika, loguje do root(chociaż nie powinno się dać zalogować, gdyż root nie ma ustawionego hasła ze względwó bezpieczeństwa).
+		> sudo -s: loguje jako root w terminalu
+		> sudo bash: to samo jak wyżej
+
+[sudo], czyli "superuser do":
+	/etc/sudoers - plik zawierający uprawnienia
+		> nie należy go modyfikować komendą [nano], a komendą [visudo] która tworzy plik .tmp i przed zapisem sprawdza go pod kątem poprawności 
+składniowej.
+		> można w pliku indywidualnie dla każdego użytkownika ustalać uprawnienia
+
+Advanced sudo [ /etc/sudoers ]:
+	Co oznacza ten wpis w pliku sudoers - [ pablo ALL=(ALL:ALL) ALL ]
+		> pablo: the username, this rule should be applied to this user
+		> ALL: the hostname that this rule should apply to
+		> (ALL:ALL): the run configuration
+			- the first ALL: the user that the user pablo can sudo into
+			- the second ALL: the group that the user pablo can sudo into
+			- if we don't specify this, we can only sudo into the root user
+		> ALL: the command specification, ALL meand any command
+	Można ustawić brak hasła - pablo ALL=(ALL:ALL) NOPASSWD: ALL
+		> brak wymogu hasła dla każdego programu
+	Brak hasła dla określonej aplikacji(tylko root user) - pablo ALL= NOPASSWD: /usr/bin/apt-get
+WAŻNE!: te indywidualne ustawienia dla użytkowników należy zapisywać w folderze /etc/sudoers.d/[username], używając programu [visudo].
+	Przykład jak pisać ten plik [sudo visudo /etc/sudoers.d/pablo]:
+		# Allow pablo to do everything without a password //komentarz
+		pablo ALL=(ALL:ALL) NOPASSWD: ALL	//polecenie
+
+Przydatna komenda [which], aby mieć pewność, że nadajemy uprawnienia do poprawnej aplikacji: 
+	sprawdza skąd jest uruchamiany dany program, np. [which cat]
+
+Logowanie jako inny użytkownik, bez jego hasła(trzeba być w grupie sudo):
+	sudo -u [username] [options], np. sudo -u vilt touch /home/vilt/file.txt lub sudo -u patras -s(-s to shell)
+		będzie tylko prompt o wpisanie własengo hasła.
+	Dlatego bardzo ważne jest, aby uważać komu nadaje się uprawnienia/grupę sudo.
+
+File permissions:
+	There are three leveles of permissions -	
+		> Owner (u)
+		> Group (g)
+		> Others (o)	
+	And three type of permissions - 
+		> Read (r/4)
+		> Write (w/2)
+		> Execute (x/1)
+	[chmod] modyfikacja uprawnień:
+		chmod [ugo]+[rwx] [nazwa pliku lub folderu]
+	[chown] modyfikacja użytkowników:
+		chown [user]:[group] [plik lub folder]
+	chmod with numerical values: 
+		chmod 754 file.txt -
+			First digit is owner 7=4+2+1=>read, write, execute
+			Second digit is group 5=4+1=>read,execute
+			Third digit is for all others 4=>read
+	Zmieniając uprawnienia folderów, dodając opcję -R zmienia równiez zawartość w folderze: chown [user]:[group] -R [plik lub folder]
+
+Advanced file permissions [umask] : 0000
+	It determines the default permissions for new files/directories. The first digit is Sticky bit
+		Temporarily change for shell(current session): umask [new value]
+		Permanent change for shell: add the umask command to the startup file of bash (~/.bashrc)
+		Permanent change for all programs: usually in the file /etc/login.defs
+
+
+Sticky bit - widnieje jako 't' na końcu (np. drwxrwxrwt)
+	It is now used for directories. Without sticky bit, any user with write+execute permissions for a directory can rename / delete file in it.
+		To set: chmod +t [folder]
+		Other way: set   chmod 1777 [folder]
+			   unset chmod 0777 [folder]
+
+Advanced permissions SUID and SGID (special user)
+	Do przerobienia...
+
+	<< Groups best-practices >>
+> Prefer groups to manage privileges
+> Use meaningful group names
+> Follow the principle of least privilege:
+	- assigning users only the necessary permissions and group memberships required
+	- avoiding the use of overly permissive access rights
+	- don't give write access to everybody 
+	- minimizing the number of users with elevated privileges
+> Keep group memberships up-to-date
+> Regularly review group permissions
+
+
+	<< Linux processes >>
+
+Note for CentOS: for extra packages you need to make sure epel-release is installed on your system - [sudo yum install epel-release]
+You can then install all the tools you need for this chapter with the following command: [sudo yum install wget htop]
+
+Each process consists of:
+	> ID
+	> User under which the process runs under
+	> A state (running, waiting, stopped, zombie)
+	> and various other properties
+System monitor - standard app for checking processes
+
+The [ps] command - "Process Status", processes in command line
+	Domyślnie uwzględnia procesy w aktualnej sesji CLI, nie w całym systemie. Dodając opcje możemy to zmienić.
+	Opcje:
+	> -A, -e: show all proesses, from all users and all sessions
+	> -f: full format listing, user, process id(PID), terminal, parent process (PPID)
+	> -p [process number]: show processes with given ID(we can omit -p and comma ex.: ps 1234 1235)
+	> --forest: dopisany na końcu, wyświetli w drzewku ASCII
+	> ps aux: BSD style parameters(more user oriented, also processes outside of a terminal)
+Searching for specific process with pipe: ps -ef | grep -F '4771'
+
+Context switches - multitasking.
+	Visualisation - [cat /proc/[process ID]/status | grep ctxt]
+	[watch] command - watch -n 0.5 grep ctxt /proc/12345/status
+
+Process priorities - Niceness
+	> Niceness ranges from -20(highest priority) to +19(lowest priority)
+	> default niceness for new processes is typically 0
+	> processes with lower niceness (higher priority) receive more time from the scheduler
+	
+
+
+	
+
+
+	
+ 
